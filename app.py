@@ -2,34 +2,6 @@ from flask import Flask, request, render_template_string, redirect, session
 import os
 
 app = Flask(__name__)
-app.secret_key = "raunak1989"
-
-LOGIN_HTML = """
-<!DOCTYPE html>
-<html><head>
-<meta name="google-site-verification" content="v0e90DURVgaMKfgFdZWb6kkAKtmoXgbV17BJ6WnhI9o" />
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Raunak Singh - Best Website Designer in Lucknow">
-<style>
-body{background:black;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:monospace}
-.box{border:2px solid #00ff00;padding:25px;width:330px;text-align:center;box-shadow:0 0 20px #00ff00;background:#000}
-h2{color:#00ff00} p{color:white}
-input{width:90%;padding:10px;margin:15px 0;background:#111;color:#00ff00;border:1px solid #00ff00;text-align:center}
-.btn{background:blue;color:white;border:none;padding:12px;width:100%;font-weight:bold;font-size:16px;cursor:pointer}
-</style></head>
-<body>
-<div class="box">
-<h2>SECURE LOGIN</h2>
-<p>Welcome to my website</p>
-<form method="POST">
-<p style="color:#00ff00">Password yaha dalo:</p>
-<input type="password" name="pwd" placeholder="Password" required>
-<button class="btn" type="submit">LOGIN</button>
-</form>
-<p style="font-size:11px;color:#555">Password = 1989</p>
-</div>
-</body></html>
-"""
 
 FORM_HTML = """
 <!DOCTYPE html>
