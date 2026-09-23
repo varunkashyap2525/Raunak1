@@ -1,156 +1,121 @@
 import tkinter as tk
 from tkinter import messagebox
-import time
-import threading
-import random
+from PIL import Image, ImageTk
+import qrcode
+import io
 
-class TermuxPrank:
+# Bikeebo Brand Name
+APP_NAME = "Bikeebo"
+
+class BikeeboApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Termux Interface")
-        self.root.geometry("350x600")
-        self.root.configure(bg="#000000")  # Black background like Termux
-        
-        # Font style for that terminal look
-        self.terminal_font = ("Courier", 12)
-        
-        # Step 1: Main Termux Screen
-        self.setup_termux_screen()
-
-    def setup_termux_screen(self):
-        """Main screen with the 'Click' button"""
-        frame = tk.Frame(self.root, bg="#000000")
-        frame.pack(fill="both", expand=True)
-        
-        # Terminal prompt look
-        label = tk.Label(frame, text="$", font=("Courier", 20), fg="#00ff00", bg="#000000")
-        label.pack(pady=20, anchor="w")
-        
-        btn = tk.Button(frame, text="Click", font=("Courier", 16), bg="#333333", fg="#00ff00",
-                        command=self.show_password_screen, activebackground="#555555", activeforeground="#00ff00")
-        btn.pack(pady=50)
-        
-        # Some fake terminal text
-        txt = tk.Label(frame, text="Welcome to Termux\nType 'click' to start...", 
-                       font=("Courier", 10), fg="#aaaaaa", bg="#000000", anchor="w")
-        txt.pack(anchor="w", padx=10, pady=10)
-
-    def show_password_screen(self):
-        """Window asking for password"""
-        # Hide main window temporarily
-        self.root.withdraw()
-        
-        pw_window = tk.Toplevel(self.root)
-        pw_window.title("Password")
-        pw_window.geometry("300x200")
-        pw_window.configure(bg="#000000")
-        pw_window.attributes("-topmost", True) # Keep on top
-
-        label = tk.Label(pw_window, text="Enter Password:", font=("Courier", 12), fg="#00ff00", bg="#000000")
-        label.pack(pady=20)
-
-        entry = tk.Entry(pw_window, font=("Courier", 14), show="*", bg="#222222", fg="#ffffff")
-        entry.pack(pady=10)
-
-        def check_password():
-            pwd = entry.get()
-            if pwd == "1989":
-                pw_window.destroy()
-                self.start_hacking_sequence()
-            else:
-                entry.delete(0, tk.END)
-                entry.insert(0, "Wrong Password")
-                entry.config(fg="red")
-                self.root.after(1000, lambda: entry.config(fg="#ffffff"))
-
-        btn = tk.Button(pw_window, text="Submit", command=check_password, bg="#00ff00", fg="#000000", font=("Courier", 12))
-        btn.pack(pady=20)
-
-    def start_hacking_sequence(self):
-        """5-second hacking animation"""
-        hack_window = tk.Toplevel(self.root)
-        hack_window.title("Hacking...")
-        hack_window.geometry("400x300")
-        hack_window.configure(bg="#000000")
-        hack_window.attributes("-topmost", True)
-
-        label = tk.Label(hack_window, text="HACKING SERVER...", font=("Courier", 16, "bold"), fg="#00ff00", bg="#000000")
-        label.pack(pady=50)
-
-        # Progress bar
-        progress = tk.Progressbar(hack_window, length=300, mode='determinate')
-        progress.pack(pady=10)
-        
-        count = 0
-        def update_progress():
-            nonlocal count
-            if count < 100:
-                progress['value'] = count
-                count += 5
-                hack_window.after(100, update_progress)
-            else:
-                hack_window.destroy()
-                self.show_welcome_page()
-
-        update_progress()
-
-    def show_welcome_page(self):
-        """The final prank page with Instagram form"""
-        self.root.deiconify() # Bring main window back
-        self.root.title("Welcome My Web")
-        
-        # Clear previous widgets
-        for widget in self.root.winfo_children():
-            widget.destroy()
+        self.root.title(APP_NAME)
+        self.root.geometry("800x600")
+        self.root.configure(bg="#f0f0f0")
 
         # Header
-        header = tk.Label(self.root, text="Welcome My Web", font=("Courier", 18, "bold"), fg="#00ff00", bg="#000000")
-        header.pack(pady=20)
+        self.header = tk.Label(root, text=APP_NAME, font=("Arial", 24, "bold"), bg="#f0f0f0", fg="#ff5722")
+        self.header.pack(pady=10)
 
-        frame = tk.Frame(self.root, bg="#111111")
-        frame.pack(fill="both", expand=True, padx=10, pady=10)
+        # Phone Data
+        self.phones = [
+            {"name": "iPhone 17", "img": "https://via.placeholder.com/150?text=iPhone+17"},
+            {"name": "iPhone 16", "img": "https://via.placeholder.com/150?text=iPhone+16"},
+            {"name": "iPhone 15", "img": "https://via.placeholder.com/150?text=iPhone+15"},
+            {"name": "iPhone 14", "img": "https://via.placeholder.com/150?text=iPhone+14"},
+            {"name": "Android Flagship", "img": "https://via.placeholder.com/150?text=Android+2026"},
+            {"name": "Android Budget X", "img": "https://via.placeholder.com/150?text=Android+Budget"}
+        ]
 
-        # Instagram Account Section
-        tk.Label(frame, text="IG ACCOUNT BEN PRANK", font=("Courier", 12, "bold"), fg="#ff0050", bg="#111111").pack(anchor="w", pady=5)
-        
-        tk.Label(frame, text="Username:", font=("Courier", 10), fg="#aaaaaa", bg="#111111").pack(anchor="w")
-        user_entry = tk.Entry(frame, font=("Courier", 10), bg="#333333", fg="#ffffff")
-        user_entry.pack(fill="x", pady=2)
-        
-        # Fake result label for username
-        user_result_label = tk.Label(frame, text="", font=("Courier", 9), fg="#ffff00", bg="#111111)
-        user_result_label.pack(anchor="w")
+        self.container = tk.Frame(root, bg="#f0f0f0")
+        self.container.pack(pady=10)
 
-        tk.Label(frame, text="Phone Number:", font=("Courier", 10), fg="#aaaaaa", bg="#111111").pack(anchor="w", pady=5)
-        phone_entry = tk.Entry(frame, font=("Courier", 10), bg="#333333", fg="#ffffff")
-        phone_entry.pack(fill="x", pady=2)
-
-        # Fake result label for phone
-        phone_result_label = tk.Label(frame, text="", font=("Courier", 9), fg="#ffff00", bg="#111111)
-        phone_result_label.pack(anchor="w")
-
-        tk.Label(frame, text="(Data hidden from user)", font=("Courier", 8), fg="#666666", bg="#111111").pack(anchor="e", pady=10)
-
-        submit_btn = tk.Button(frame, text="GENERATE", command=lambda: self.generate_data(user_entry.get(), phone_entry.get(), user_result_label, phone_result_label),
-                               bg="#00ff00", fg="#000000", font=("Courier", 12))
-        submit_btn.pack(pady=20)
-
-    def generate_data(self, user, phone, user_lbl, phone_lbl):
-        """Logic to show 24 Grants and Hardoi UP"""
-        if user:
-            # Show 24 granted time
-            user_lbl.config(text="[GRANTED] 24:00:00 HOURS REMAINING", fg="#00ff00")
-        
-        if phone:
-            # Show Hardoi UP
-            phone_lbl.config(text="LOCATION: HARDOI, UP", fg="#00ff00")
+        # Create Cards
+        self.cards = []
+        for i, phone in enumerate(self.phones):
+            card = tk.Frame(self.container, bg="white", bd=1, relief="solid", width=200, height=300)
+            card.grid(row=i // 2, column=i % 2, padx=10, pady=10)
+            card.pack_propagate(False)
             
-        # Final success message
-        tk.Message(self.root, text="Account Ben Prank Processed Successfully.", 
-                   font=("Courier", 10), fg="#ffffff", bg="#000000").pack(pady=10)
+            # Image Placeholder (Using text for demo, you can replace with actual ImageTk.PhotoImage)
+            img_label = tk.Label(card, text="📱", font=("Arial", 40), bg="white")
+            img_label.pack(pady=5)
+            
+            name_label = tk.Label(card, text=phone["name"], font=("Arial", 12, "bold"), bg="white")
+            name_label.pack()
 
+            price_label = tk.Label(card, text="₹500", font=("Arial", 14, "bold"), fg="green", bg="white")
+            price_label.pack()
+
+            buy_btn = tk.Button(card, text="BUY NOW", command=lambda p=phone: self.open_buy_window(p), bg="#ff5722", fg="white", font=("Arial", 10, "bold"))
+            buy_btn.pack(pady=5)
+
+            self.cards.append(card)
+
+    def open_buy_window(self, phone):
+        buy_win = tk.Toplevel(self.root)
+        buy_win.title(f"Buy {phone['name']}")
+        buy_win.geometry("400x500")
+        buy_win.configure(bg="#f0f0f0")
+
+        tk.Label(buy_win, text=phone["name"], font=("Arial", 16, "bold"), bg="#f0f0f0").pack(pady=10)
+        tk.Label(buy_win, text="Price: ₹500", font=("Arial", 12), bg="#f0f0f0").pack()
+
+        # Form Fields
+        fields = ["Full Name", "Phone Number", "City", "Address"]
+        entries = []
+        for field in fields:
+            tk.Label(buy_win, text=f"{field}:", font=("Arial", 10), bg="#f0f0f0").pack(anchor="w", padx=20, pady=2)
+            entry = tk.Entry(buy_win, font=("Arial", 10), width=30)
+            entry.pack(padx=20, pady=2)
+            entries.append(entry)
+
+        def submit():
+            details = [e.get() for e in entries]
+            if any(not d for d in details):
+                messagebox.showwarning("Missing Info", "Please fill all fields.")
+                return
+            
+            # Show Scanner Page
+            show_scanner(buy_win, phone["name"], details)
+
+        tk.Button(buy_win, text="Confirm & Scan", command=submit, bg="#2196f3", fg="white", font=("Arial", 10, "bold")).pack(pady=20)
+
+    def show_scanner(self, win, phone_name, details):
+        # Clear current window content
+        for widget in win.winfo_children():
+            widget.destroy()
+
+        tk.Label(win, text="Scanner", font=("Arial", 20, "bold"), bg="#f0f0f0").pack(pady=20)
+        
+        # Generate QR Code Data
+        qr_data = f"Order: {phone_name}\nName: {details[0]}\nNum: {details[1]}\nCity: {details[2]}\nAddr: {details[3]}\nAmount: ₹500"
+        
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save to a buffer to display in Tkinter
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+        buffer.seek(0)
+        
+        # Load image for Tkinter
+        try:
+            from PIL import ImageTk
+            img_tk = ImageTk.PhotoImage(Image.open(buffer))
+            tk.Label(win, image=img_tk, bg="#f0f0f0").pack(pady=10)
+            win.image = img_tk # Keep reference
+        except Exception as e:
+            tk.Label(win, text="QR Code Generated (Check Console)", bg="#f0f0f0").pack()
+            print(qr_data)
+
+        tk.Label(win, text="Scan to Pay ₹500", font=("Arial", 12), bg="#f0f0f0").pack()
+        tk.Button(win, text="Back", command=lambda: [win.destroy()], bg="#ff5722", fg="white").pack(pady=10)
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = TermuxPrank(root)
+    app = BikeeboApp(root)
     root.mainloop()
